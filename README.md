@@ -21,7 +21,7 @@ A C implementation of the LLaMA2 model with training capabilities, inspired by [
     - Saves the activations, gradients in 'state.bin'
   - `make test`
     - Load the activations and gradients in 'state.bin'
-    - Load llama2 model (in in model.py) from the 'stories15M.pt' checkpoint
+    - Load llama2 model (in model.py) from the 'stories15M.pt' checkpoint
     - Run a single forward pass
     - Test tensor equality 
 - Tests individual model components:
@@ -38,4 +38,3 @@ This project reimplements the core LLaMA2 architecture in C with a focus on:
 Model architecture and approach based on:
 - [llama2.c](https://github.com/karpathy/llama2.c) by Andrej Karpathy
 - Original [model.py](https://github.com/karpathy/llama2.c/blob/master/model.py) implementation
-- 
