@@ -126,71 +126,19 @@ checkpoint = torch.load(checkpoint_path)
 tmodel.load_state_dict(checkpoint["model"], strict=False)
 optimizer = torch.optim.AdamW(params=tmodel.parameters(), lr=lr, betas=(beta1, beta2))
 
-print(len(list(tmodel.parameters())))
 optimizer.zero_grad()
 
 logits = tmodel.forward(tokens, targets=targets)
 tmodel.last_loss.backward(retain_graph=True, create_graph=True)
-print(tmodel.norm.weight.sum())
-print(tmodel.norm.weight.grad.sum())
 optimizer.step()
-
-print("wte", tmodel.output.weight.grad.sum(), dwte.sum())
-print(
-    "rms_att_weight",
-    sum([tmodel.layers[l].attention_norm.weight.sum() for l in range(tmodel.n_layers)]),
-)
-print(
-    "rms_ffn_weight",
-    sum([tmodel.layers[l].ffn_norm.weight.sum() for l in range(tmodel.n_layers)]),
-)
-
-print(
-    "wq",
-    sum([tmodel.layers[l].attention.wq.weight.sum() for l in range(tmodel.n_layers)]),
-)
-print(
-    "wk",
-    sum([tmodel.layers[l].attention.wk.weight.sum() for l in range(tmodel.n_layers)]),
-)
-print(
-    "wv",
-    sum([tmodel.layers[l].attention.wv.weight.sum() for l in range(tmodel.n_layers)]),
-)
-print(
-    "wo",
-    sum([tmodel.layers[l].attention.wo.weight.sum() for l in range(tmodel.n_layers)]),
-)
-
-print(
-    "w1",
-    sum(
-        [tmodel.layers[l].feed_forward.w1.weight.sum() for l in range(tmodel.n_layers)]
-    ),
-)
-print(
-    "w2",
-    sum(
-        [tmodel.layers[l].feed_forward.w2.weight.sum() for l in range(tmodel.n_layers)]
-    ),
-)
-print(
-    "w3",
-    sum(
-        [tmodel.layers[l].feed_forward.w3.weight.sum() for l in range(tmodel.n_layers)]
-    ),
-)
-
-print("rms_final_weight", sum([tmodel.norm.weight.sum()]))
-
-all_match = True
-
 
 def test_tensor_equality(name, a, b, rtol=1e-6, atol=1e-2, l=None):
     try:
         assert  torch.allclose(a, b, rtol=rtol, atol=atol)
     except AssertionError as e:
         msg = f"{name} does not match in {l} with atol={atol} amd rtol={rtol}"
+        if isinstance(l, str):
+            msg = f"{name} does not match with {l} with atol={atol} amd rtol={rtol}"
         print(f"{msg} {a.sum()} {b.sum()}")
         raise AssertionError(msg)
 
@@ -321,13 +269,12 @@ for l in range(L):
         tmodel.layers[l].attn_norm.grad.ravel(),
         l=l,
     )
-assert torch.allclose(wcls, tmodel.output.weight, rtol=1e-6, atol=1e-2)
 test_tensor_equality(
-    "token_embedding",
+    "output",
     wcls.ravel(),
     tmodel.output.weight.ravel(),
-
+    l="wcls"
 )
 
-print("All match: ", all_match)
+print("All match")
  
